@@ -1,4 +1,8 @@
-import os, json, anthropic
+import os, json
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SYSTEM_PROMPT = """You are a support ticket classifier. Given a ticket description,
 retrun ONLY valid JSON with two keys:
@@ -18,19 +22,31 @@ Rules:
 Respond with ONLY the JSON object, no explanations or other text."""
 
 def classify_ticket(description: str) -> dict | None:
-    api_key = os.environ.get('LLM_API_KEY', '')
+    api_key = os.environ.get('LLM_API_KEY')
     if not api_key:
         return None
     try:
-        client = anthropic.Anthropic(api_key=api_key)
-        message = client.message.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=100,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": description}]
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=api_key
         )
-        raw = message.content[0].text.strip()
-        result = json.loads(raw)
+
+        response = client.chat.completions.create(
+            model="openrouter/aurora-alpha",
+            messages= [
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT
+                },
+                {
+                    "role": "user",
+                    "content": description
+                }
+            ]
+        )
+
+        result = json.loads(response.choices[0].message.content)
+
         valid_cats = ["billing", "technical", "account", "general"]
         valid_pris = ["low", "medium", "high", "critical"]
         if result.get("category") in valid_cats and result.get("priority") in valid_pris:

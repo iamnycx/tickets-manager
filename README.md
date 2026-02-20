@@ -2,6 +2,8 @@
 
 A modern support ticket management system where users can submit, browse, filter, and manage support tickets with LLM-assisted auto-classification and prioritization.
 
+<img src='./assets/demo.png'>
+
 ## Tech Stack
 
 -   **Frontend**: React with TypeScript, Vite

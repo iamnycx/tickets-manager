@@ -1,17 +1,12 @@
-FROM oven/bun:latest as builder
-
-WORKDIR /app
-
-COPY package.json bun.lock* ./
-RUN bun install --frozen-lockfile
-
-COPY . .
-RUN bun run build
-
 FROM node:18-alpine
 
 WORKDIR /app
-COPY --from=builder /app/dist ./dist
+
+COPY package.json package-lock.json* ./
+RUN npm install
+
+COPY . .
+RUN npm run build
 
 EXPOSE 4173
-CMD ["npx", "serve", "-s", "dist", "-l", "4173"]
+CMD ["npm", "run", "preview", "--", "--host", "--port", "4173"]

@@ -3,16 +3,18 @@ services:
         image: postgres:15-alpine
         restart: unless-stopped
         environment:
-            POSTGRES_DB: ${POSTGRES_DB}
-            POSTGRES_USER: ${POSTGRES_USER}
-            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: tickets
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
         volumes:
             - pgdata:/var/lib/postgresql/data
+        ports:
+            - '5432:5432'
         healthcheck:
             test:
                 [
                     'CMD-SHELL',
-                    'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}',
+                    'pg_isready -U postgres -d tickets -h localhost || exit 1',
                 ]
             interval: 5s
             timeout: 5s
@@ -21,12 +23,12 @@ services:
     backend:
         build: ./backend
         restart: unless-stopped
-        expose:
-            - '8000'
+        ports:
+            - '8000:8000'
         environment:
-            POSTGRES_DB: ${POSTGRES_DB}
-            POSTGRES_USER: ${POSTGRES_USER}
-            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: tickets
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
             POSTGRES_HOST: db
             LLM_API_KEY: ${LLM_API_KEY}
         depends_on:
@@ -51,7 +53,7 @@ services:
         ports:
             - '4173:4173'
         environment:
-            VITE_API_URL: http://backend:8000
+            VITE_API_URL: http://backend:8000/api
         depends_on:
             backend:
                 condition: service_healthy

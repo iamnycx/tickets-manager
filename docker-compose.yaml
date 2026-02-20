@@ -1,0 +1,60 @@
+services:
+    db:
+        image: postgres:15-alpine
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}',
+                ]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+    backend:
+        build: ./backend
+        restart: unless-stopped
+        expose:
+            - '8000'
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_HOST: db
+            LLM_API_KEY: ${LLM_API_KEY}
+        depends_on:
+            db:
+                condition: service_healthy
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'curl -f http://localhost:8000/api/tickets/ || exit 1',
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 20s
+
+    frontend:
+        build: ./frontend
+        restart: unless-stopped
+        expose:
+            - '4173'
+        ports:
+            - '4173:4173'
+        environment:
+            VITE_API_URL: http://backend:8000
+        depends_on:
+            backend:
+                condition: service_healthy
+
+volumes:
+    pgdata:

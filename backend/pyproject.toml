@@ -9,6 +9,6 @@ dependencies = [
     "django-cors-headers>=4.9.0",
     "djangorestframework>=3.16.1",
     "openai>=2.21.0",
-    "psycopg2>=2.9.11",
+    "psycopg2-binary>=2.9.11",
     "python-dotenv>=1.2.1",
 ]

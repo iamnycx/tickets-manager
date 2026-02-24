@@ -10,8 +10,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-^lu=z))c^4f@+0wn0b#2!
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = [str(os.environ.get('ALLOWED_HOSTS', '*'))]
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -96,12 +94,18 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
-_cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', '')
-if _cors_origins:
-    CORS_ALLOWED_ORIGINS = str(_cors_origins)
+_cors = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+if isinstance(_cors, list):
+    CORS_ALLOWED_ORIGINS = _cors
 else:
-    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in _cors.split(',') if origin.strip()]
 
+_hosts = os.environ.get('ALLOWED_HOSTS', '*')
+if isinstance(_hosts, list):
+    ALLOWED_HOSTS = _hosts
+else:
+    ALLOWED_HOSTS = [h.strip() for h in _hosts.split(',') if h.strip()]
+    
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 if not DEBUG:

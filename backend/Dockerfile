@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y libpq-dev gcc curl && rm -rf /var/lib/a
 COPY pyproject.toml .
 RUN pip install uv && uv pip install --system .
 
+# cache-bust: 2026-02-25
 COPY . .
 
 CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]

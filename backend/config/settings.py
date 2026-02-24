@@ -10,7 +10,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-^lu=z))c^4f@+0wn0b#2!
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = str(os.environ.get('ALLOWED_HOSTS', '*')).split(',')
+def to_list(value):
+    if isinstance(value, list):
+        return value
+    return str(value).split(',')
+
+ALLOWED_HOSTS = to_list(os.environ.get('ALLOWED_HOSTS', '*'))
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -98,7 +103,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 _cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', '')
 if _cors_origins:
-    CORS_ALLOWED_ORIGINS = str(_cors_origins).split(',')
+    CORS_ALLOWED_ORIGINS = to_list(_cors_origins)
 else:
     CORS_ALLOW_ALL_ORIGINS = True
 

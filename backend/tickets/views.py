@@ -1,11 +1,15 @@
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
-from django.db.models import Q, Count, Avg, F
+from django.db.models import Q, Count
 from django.db.models.functions import TruncDate
 from .models import Ticket
 from .serializers import TicketSerializer
 from .llm import classify_ticket
+
+@api_view(['GET'])
+def healthcheck(_):
+    return Response({'status': 'ok'})
 
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()

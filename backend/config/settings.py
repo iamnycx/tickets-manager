@@ -4,11 +4,22 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+def env_bool(name, default=False):
+    return os.environ.get(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(name, default=""):
+    return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-^lu=z))c^4f@+0wn0b#2!shcu@f*4gz0(j54(d(5u#)ps=^aq$')
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-^lu=z))c^4f@+0wn0b#2!shcu@f*4gz0(j54(d(5u#)ps=^aq$'
+)
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = env_bool('DEBUG', False)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -89,26 +100,38 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
-_cors = os.environ.get('CORS_ALLOWED_ORIGINS', '')
-if isinstance(_cors, list):
-    CORS_ALLOWED_ORIGINS = _cors
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in _cors.split(',') if origin.strip()]
+    CORS_ALLOWED_ORIGINS = env_list(
+        'CORS_ALLOWED_ORIGINS',
+        'http://localhost:4173,http://127.0.0.1:4173'
+    )
 
-_hosts = os.environ.get('ALLOWED_HOSTS', '*')
-if isinstance(_hosts, list):
-    ALLOWED_HOSTS = _hosts
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
 else:
-    ALLOWED_HOSTS = [h.strip() for h in _hosts.split(',') if h.strip()]
-    
+    ALLOWED_HOSTS = env_list(
+        'ALLOWED_HOSTS',
+        'localhost,127.0.0.1,[::1],backend,frontend,0.0.0.0'
+    )
+   
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SESSOIN_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', False)
+    SESSION_COOKIE_SECURE = env_bool('SESSION_COOKIE_SECURE', True)
+    CSRF_COOKIE_SECURE = env_bool('CSRF_COOKIE_SECURE', True)
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', False)
+    SECURE_HSTS_PRELOAD = env_bool('SECURE_HSTS_PRELOAD', False)
+    CSRF_TRUSTED_ORIGINS = env_list(
+        'CSRF_TRUSTED_ORIGINS',
+        'http://localhost:4173,http://127.0.0.1:4173'
+    )

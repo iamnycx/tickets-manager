@@ -163,7 +163,7 @@ support-tickets/
 All services include health checks:
 
 -   **Database**: pg_isready
--   **Backend**: HTTP requests to `/api/tickets/`
+-   **Backend**: HTTP requests to `/api/health/`
 
 ## Troubleshooting
 

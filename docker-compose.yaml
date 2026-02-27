@@ -38,7 +38,7 @@ services:
             test:
                 [
                     'CMD-SHELL',
-                    'curl -f http://localhost:8000/api/tickets/ || exit 1',
+                    'curl -f http://localhost:8000/api/health/ || exit 1',
                 ]
             interval: 10s
             timeout: 5s
